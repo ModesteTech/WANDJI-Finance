@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request,redirect,session
-import sqlite3
+import sqlite3,os
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
-app.secret_key = "wandji-finance-secret"
+app.secret_key = os.environ.get("SECRET_KEY")
 
 def get_db():
     conn = sqlite3.connect("wandji_finance.db")
@@ -231,6 +231,10 @@ def historique():
 
 @app.route("/supprimer-depense/<int:id>")
 def supprimer_depense(id):
+
+    if "utilisateur_id" not in session:
+        return redirect("/connexion")
+    
     conn = get_db()
 
     conn.execute("""
@@ -246,6 +250,10 @@ def supprimer_depense(id):
 
 @app.route("/supprimer-revenu/<int:id>")
 def supprimer_revenu(id):
+
+    if "utilisateur_id" not in session:
+        return redirect("/connexion")
+    
     conn = get_db()
 
     conn.execute("""
@@ -261,6 +269,9 @@ def supprimer_revenu(id):
 
 @app.route("/modifier-depense/<int:id>", methods=["GET", "POST"])
 def modifier_depense(id):
+
+    if "utilisateur_id" not in session:
+        return redirect("/connexion")
 
     conn = get_db()
 
@@ -313,6 +324,9 @@ def modifier_depense(id):
 
 @app.route("/modifier-revenu/<int:id>", methods=["GET", "POST"])
 def modifier_revenu(id):
+
+    if "utilisateur_id" not in session:
+        return redirect("/connexion")
 
     conn = get_db()
 
