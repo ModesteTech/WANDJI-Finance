@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Modifier un revenu - Wandji Finance</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<header class="navbar">
+
+    <div class="logo">
+        WANDJI <span>FINANCE</span>
+    </div>
+
+    <nav>
+        <a href="/">Accueil</a>
+        <a href="/historique">Historique</a>
+    </nav>
+
+</header>
+
+
+<main class="container">
+
+    <section class="welcome">
+
+        <h1>Modifier un revenu</h1>
+
+        <p>Modifiez les informations de votre revenu.</p>
+
+    </section>
+
+
+    <section class="form-card">
+
+        <form method="POST">
+
+            <div class="form-group">
+
+                <label for="montant">
+                    Montant (FCFA)
+                </label>
+
+                <input
+                    type="number"
+                    id="montant"
+                    name="montant"
+                    value="{{ revenu['montant'] }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="source">
+                    Source du revenu
+                </label>
+
+                <select
+                    id="source"
+                    name="source"
+                    required
+                >
+
+                    <option value="Salaire"
+                        {% if revenu['source'] == 'Salaire' %}selected{% endif %}>
+                        Salaire
+                    </option>
+
+                    <option value="Commerce"
+                        {% if revenu['source'] == 'Commerce' %}selected{% endif %}>
+                        Commerce
+                    </option>
+
+                    <option value="Cadeau"
+                        {% if revenu['source'] == 'Cadeau' %}selected{% endif %}>
+                        Cadeau
+                    </option>
+
+                    <option value="Autre"
+                        {% if revenu['source'] == 'Autre' %}selected{% endif %}>
+                        Autre
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="description">
+                    Description
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="4"
+                >{{ revenu['description'] }}</textarea>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="date">
+                    Date
+                </label>
+
+                <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value="{{ revenu['date'] }}"
+                    required
+                >
+
+            </div>
+
+
+            <button type="submit">
+                Enregistrer les modifications
+            </button>
+
+        </form>
+
+    </section>
+
+</main>
+
+</body>
+
+</html>

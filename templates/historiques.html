@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Historique - Wandji Finance</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<header class="navbar">
+
+    <div class="logo">
+        WANDJI <span>FINANCE</span>
+    </div>
+
+    <nav>
+        <a href="/">Accueil</a>
+        <a href="/ajouter-depense">Dépenses</a>
+        <a href="/ajouter-revenu">Revenus</a>
+        <a href="/historique">Historique</a>
+    </nav>
+
+</header>
+
+
+<main class="container">
+
+    <section class="welcome">
+
+        <h1>Historique des transactions</h1>
+
+        <p>Retrouvez toutes vos opérations financières.</p>
+
+    </section>
+
+
+    <section class="transactions">
+
+        {% if transactions %}
+
+            <div class="transactions-liste">
+
+            {% for transaction in transactions %}
+
+        <div class="transaction">
+
+            <div>
+
+                <strong>
+                    {{ transaction["categorie"] }}
+                </strong>
+
+                <p>
+                    {{ transaction["description"] }}
+                </p>
+
+                <small>
+                    {{ transaction["date"] }}
+                </small>
+
+            </div>
+
+
+            {% if transaction["type"] == "depense" %}
+
+                <strong>
+                    - {{ transaction["montant"] }} FCFA
+                </strong>
+
+                <a href="/modifier-depense/{{ transaction['id'] }}">
+                    Modifier
+                </a>
+
+                <a href="/supprimer-depense/{{ transaction['id'] }}"
+   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dépense ?');">
+   Supprimer
+    </a>
+
+            {% else %}
+
+                <strong>
+                    + {{ transaction["montant"] }} FCFA
+                </strong>
+
+                <a href="/modifier-revenu/{{ transaction['id'] }}">
+                    Modifier
+                </a>
+
+                <a href="/supprimer-revenu/{{ transaction['id'] }}"
+   onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce revenu ?');">
+    Supprimer
+    </a>
+
+            {% endif %}
+
+        </div>
+
+    {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <p>Aucune transaction enregistrée.</p>
+
+        {% endif %}
+
+    </section>
+
+</main>
+
+</body>
+
+</html>

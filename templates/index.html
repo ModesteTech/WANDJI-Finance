@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Wandji Finance</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header class="navbar">
+
+        <div class="logo">
+            WANDJI <span>FINANCE</span>
+        </div>
+
+        <nav>
+            <a href="/">Accueil</a>
+            <a href="#Depenses">Dépenses</a>
+            <a href="#Revenus">Revenus</a>
+            <a href="/historique">Historique</a>
+            <a href="/deconnexion">Déconnexion</a>
+        </nav>
+
+    </header>
+
+
+    <main class="container">
+
+        <section class="welcome">
+
+            <h1>Bonjour, {{ session["nom_utilisateur"] }} 👋</h1>
+
+            <p>Gérez votre argent intelligemment.</p>
+
+        </section>
+
+
+        <section class="balance-card">
+
+            <p class="balance-title">
+                SOLDE DISPONIBLE
+            </p>
+
+            <h2>{{ solde }} FCFA</h2>
+
+
+            <div class="balance-details">
+
+                <div>
+                    <p>Revenus</p>
+                    <strong>{{ total_revenus }} FCFA</strong>
+                </div>
+
+                <div>
+                    <p>Dépenses</p>
+                    <strong>{{ total_depenses }} FCFA</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="quick-actions">
+
+            <h2>Actions rapides</h2>
+
+            <div class="actions">
+
+                <a href="/ajouter-depense" class="action-button"> + Ajouter une dépense </a>
+
+                <a href="/ajouter-revenu" class="action-button"> + Ajouter un revenu </a>
+
+
+            </div>
+
+        </section>
+
+
+    <section class="transactions">
+
+        <h2>Dernières transactions</h2>
+
+        {% if transactions %}
+
+            <div class="transactions-liste">
+
+                {% for transaction in transactions[:3] %}
+
+                    <div class="transaction">
+
+                        <div>
+                            <strong>{{ transaction["categorie"] }}</strong>
+
+                            <p>{{ transaction["description"] }}</p>
+
+                            <small>{{ transaction["date"] }}</small>
+                        </div>
+
+                        {% if transaction["type"] == "depense" %}
+
+                            <strong>
+                                - {{ transaction["montant"] }} FCFA
+                            </strong>
+
+                        {% else %}
+
+                            <strong>
+                                + {{ transaction["montant"] }} FCFA
+                            </strong>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <p class="empty-message">
+                Aucune transaction pour le moment.
+            </p>
+
+        {% endif %}
+
+    </section>
+
+    <section class="depenses-section" id="Depenses">
+
+        <h2>Mes dépenses</h2>
+        
+            {% if depenses %}
+
+            <div class="depenses-liste">
+
+                {% for depense in depenses %}
+
+                    <div class="depense">
+
+                        <div>
+                            <strong>{{ depense["categorie"] }}</strong>
+
+                            <p>{{ depense["description"] }}</p>
+
+                            <small>{{ depense["date"] }}</small>
+                        </div>
+
+                        <strong>
+                            {{ depense["montant"] }} FCFA
+                        </strong>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <p>Aucune dépense enregistrée pour le moment.</p>
+
+        {% endif %}
+
+    </section>
+
+    <section class="revenus-section" id="Revenus">
+        <h2>Mes revenus</h2>
+
+        {% if revenus %}
+            <div class="revenus-liste">
+
+                {% for revenu in revenus %}
+
+                    <div class="revenu">
+                        <div>
+                            <strong>{{ revenu["source"] }}</strong>
+
+                            <p>{{ revenu["description"] }}</p>
+
+                            <small>{{ revenu["date"] }}</small>
+                        </div>
+
+                        <strong>
+                            {{ revenu["montant"] }} FCFA
+                        </strong>
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+            <p>Aucun revenu enregistré pour le moment.</p>
+        {% endif %}
+    </section>
+
+    </main>
+
+</body>
+
+</html>

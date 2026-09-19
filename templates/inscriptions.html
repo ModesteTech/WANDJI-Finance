@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Inscription - Wandji Finance</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header class="navbar">
+        <div class="logo">
+            WANDJI <span>FINANCE</span>
+        </div>
+
+        <nav>
+            <a href="/">Accueil</a>
+        </nav>
+    </header>
+
+    <main class="container">
+
+        <section class="welcome">
+            <h1>Créer un compte</h1>
+            <p>Rejoignez Wandji Finance.</p>
+        </section>
+
+        <section class="form-card">
+
+            <form method="POST">
+
+                <div class="form-group">
+                    <label for="nom">Nom</label>
+
+                    <input
+                        type="text"
+                        id="nom"
+                        name="nom"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Adresse email</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="mot_de_passe">Mot de passe</label>
+
+                    <input
+                        type="password"
+                        id="mot_de_passe"
+                        name="mot_de_passe"
+                        required
+                    >
+                </div>
+
+                <button type="submit">
+                    Créer mon compte
+                </button>
+
+            </form>
+
+            <p class="connexion-link">
+                Vous avez déjà un compte ?
+                <a href="/connexion">Se connecter</a>
+            </p>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
