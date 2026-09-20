@@ -1,49 +1,73 @@
 from flask import Flask, render_template, request,redirect,session
-import sqlite3,os
+import os,sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
+
 
 app = Flask(__name__)
 
 app.secret_key = os.environ.get("SECRET_KEY")
 
 def get_db():
+    database_url = os.environ.get("DATABASE_URL")
+
+    if database_url:
+        import psycopg2
+        import psycopg2.extras
+
+        return psycopg2.connect(
+            database_url,
+            cursor_factory=psycopg2.extras.RealDictCursor
+        )
+
     conn = sqlite3.connect("wandji_finance.db")
     conn.row_factory = sqlite3.Row
     return conn
 
+def execute_query(conn, query, params=()):
+    if os.environ.get("DATABASE_URL"):
+        query = query.replace("?", "%s")
+
+    return conn.execute(query, params)
+
 def init_db():
     conn = get_db()
 
-    conn.execute("""
+    if os.environ.get("DATABASE_URL"):
+        id_type = "SERIAL PRIMARY KEY"
+    else:
+        id_type = "INTEGER PRIMARY KEY AUTOINCREMENT"
+
+    conn.execute(f"""
         CREATE TABLE IF NOT EXISTS depenses (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        montant REAL NOT NULL,
-        categorie TEXT NOT NULL,
-        description TEXT,
-        date TEXT NOT NULL,
-        utilisateur_id INTEGER
+            id {id_type},
+            montant REAL NOT NULL,
+            categorie TEXT NOT NULL,
+            description TEXT,
+            date TEXT NOT NULL,
+            utilisateur_id INTEGER
         )
     """)
 
-    conn.execute("""
+    conn.execute(f"""
         CREATE TABLE IF NOT EXISTS revenus (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        montant REAL NOT NULL,
-        source TEXT NOT NULL,
-        description TEXT,
-        date TEXT NOT NULL,
-        utilisateur_id INTEGER
+            id {id_type},
+            montant REAL NOT NULL,
+            source TEXT NOT NULL,
+            description TEXT,
+            date TEXT NOT NULL,
+            utilisateur_id INTEGER
         )
     """)
 
-    conn.execute("""
+    conn.execute(f"""
         CREATE TABLE IF NOT EXISTS utilisateurs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_type},
             nom TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             mot_de_passe TEXT NOT NULL
         )
     """)
+
     conn.commit()
     conn.close()
 
@@ -57,25 +81,25 @@ def accueil():
 
     conn = get_db()
 
-    depenses = conn.execute("""
+    depenses = execute_query(conn,"""
     SELECT * FROM depenses
     WHERE utilisateur_id = ?
     ORDER BY date DESC
     """, (session["utilisateur_id"],)).fetchall()
 
-    revenus = conn.execute("""
+    revenus = execute_query(conn,"""
     SELECT * FROM revenus
     WHERE utilisateur_id = ?
     ORDER BY date DESC
     """, (session["utilisateur_id"],)).fetchall()
 
-    total_depenses = conn.execute("""
+    total_depenses = execute_query(conn,"""
     SELECT COALESCE(SUM(montant), 0) AS total
     FROM depenses
     WHERE utilisateur_id = ?
     """, (session["utilisateur_id"],)).fetchone()["total"]
 
-    total_revenus = conn.execute("""
+    total_revenus = execute_query(conn,"""
     SELECT COALESCE(SUM(montant), 0) AS total
     FROM revenus
     WHERE utilisateur_id = ?
@@ -132,10 +156,15 @@ def ajouter_depense():
 
         conn = get_db()
 
-        conn.execute("""
+        execute_query(conn,"""
             INSERT INTO depenses
             (montant, categorie, description, date, utilisateur_id)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?
+    , ?
+    , ?
+    , ?
+    , ?
+    )
         """, (
             montant,
             categorie,
@@ -166,10 +195,15 @@ def ajouter_revenu():
 
         conn = get_db()
 
-        conn.execute("""
+        execute_query(conn,"""
         INSERT INTO revenus
         (montant, source, description, date, utilisateur_id)
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (?
+, ?
+, ?
+, ?
+, ?
+)
         """, (
         montant,
         source,
@@ -194,7 +228,7 @@ def historique():
     
     conn = get_db()
 
-    depenses = conn.execute("""
+    depenses = execute_query(conn,"""
         SELECT
             id,
             'depense' AS type,
@@ -204,9 +238,10 @@ def historique():
             date
         FROM depenses
         WHERE utilisateur_id = ?
+
         """, (session["utilisateur_id"],)).fetchall()
 
-    revenus = conn.execute("""
+    revenus = execute_query(conn,"""
         SELECT
             id,
             'revenu' AS type,
@@ -216,6 +251,7 @@ def historique():
             date
         FROM revenus
         WHERE utilisateur_id = ?
+
         """, (session["utilisateur_id"],)).fetchall()
 
     conn.close()
@@ -240,10 +276,12 @@ def supprimer_depense(id):
     
     conn = get_db()
 
-    conn.execute("""
+    execute_query(conn,"""
         DELETE FROM depenses
         WHERE id = ?
+
         AND utilisateur_id = ?
+
     """, (id, session["utilisateur_id"]))
 
     conn.commit()
@@ -259,10 +297,12 @@ def supprimer_revenu(id):
     
     conn = get_db()
 
-    conn.execute("""
+    execute_query(conn,"""
         DELETE FROM revenus
         WHERE id = ?
+
         AND utilisateur_id = ?
+
     """, (id, session["utilisateur_id"]))
 
     conn.commit()
@@ -278,10 +318,11 @@ def modifier_depense(id):
 
     conn = get_db()
 
-    depense = conn.execute(
+    depense = execute_query(conn,
     """
     SELECT * FROM depenses
     WHERE id = ?
+
     AND utilisateur_id = ?
     """,
     (id, session["utilisateur_id"])
@@ -298,19 +339,24 @@ def modifier_depense(id):
         description = request.form["description"]
         date = request.form["date"]
 
-        conn.execute("""
+        execute_query(conn,"""
             UPDATE depenses
-            SET montant = ?,
-                categorie = ?,
-                description = ?,
+            SET montant = ?
+    ,
+                categorie = ?
+        ,
+                description = ?
+        ,
                 date = ?
+        
             WHERE id = ?
+    
         """, (
             montant,
             categorie,
             description,
             date,
-            session["utilisateur_id"]
+            id
         ))
 
         conn.commit()
@@ -333,11 +379,12 @@ def modifier_revenu(id):
 
     conn = get_db()
 
-    revenu = conn.execute(
+    revenu = execute_query(conn,
     """
     SELECT * FROM revenus
     WHERE id = ?
     AND utilisateur_id = ?
+
     """,
     (id, session["utilisateur_id"])
     ).fetchone()
@@ -353,19 +400,29 @@ def modifier_revenu(id):
         description = request.form["description"]
         date = request.form["date"]
 
-        conn.execute("""
+        execute_query(conn,"""
             UPDATE revenus
-            SET montant = ?,
-                source = ?,
-                description = ?,
+            SET montant = ?
+    
+            ,
+                source = ?
+        
+                ,
+                description = ?
+        
+                ,
                 date = ?
+        
+
             WHERE id = ?
+    
+
         """, (
             montant,
             source,
             description,
             date,
-            session["utilisateur_id"]
+            id
         ))
 
         conn.commit()
@@ -381,6 +438,7 @@ def modifier_revenu(id):
     )
 
 @app.route("/inscription", methods=["GET", "POST"])
+@app.route("/inscription", methods=["GET", "POST"])
 def inscription():
     if request.method == "POST":
         nom = request.form["nom"]
@@ -392,23 +450,31 @@ def inscription():
         conn = get_db()
 
         try:
-            conn.execute("""
+            execute_query(conn, """
                 INSERT INTO utilisateurs (nom, email, mot_de_passe)
                 VALUES (?, ?, ?)
             """, (nom, email, mot_de_passe_hash))
 
             conn.commit()
 
-        except sqlite3.IntegrityError:
+        except Exception:
             conn.close()
             return "Cette adresse email existe déjà."
 
+        # Connexion automatique après inscription
+        utilisateur = execute_query(conn, """
+            SELECT * FROM utilisateurs
+            WHERE email = ?
+        """, (email,)).fetchone()
+
         conn.close()
+
+        session["utilisateur_id"] = utilisateur["id"]
+        session["nom_utilisateur"] = utilisateur["nom"]
 
         return redirect("/")
 
     return render_template("inscriptions.html")
-
 @app.route("/connexion", methods=["GET", "POST"])
 def connexion():
     if request.method == "POST":
@@ -417,9 +483,11 @@ def connexion():
 
         conn = get_db()
 
-        utilisateur = conn.execute("""
+        utilisateur = execute_query(conn,"""
             SELECT * FROM utilisateurs
             WHERE email = ?
+    
+
         """, (email,)).fetchone()
 
         conn.close()
