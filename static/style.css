@@ -285,3 +285,55 @@ nav a:hover {
     color: #999;
 }
 
+/* css pour l'oeil*/
+
+.form-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 45px 12px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.form-group .toggle-password {
+    position: absolute;
+    right: 10px;
+    bottom: 7px;
+
+    width: auto;
+    height: auto;
+
+    padding: 5px;
+    margin: 0;
+
+    background: transparent;
+    border: none;
+
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/*fixer l'en tete*/
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.container {
+    padding-top: 50px;
+}

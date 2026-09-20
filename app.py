@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request,redirect,session
-import os,sqlite3
+import os,sqlite3,re
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -444,7 +444,15 @@ def inscription():
         nom = request.form["nom"]
         email = request.form["email"]
         mot_de_passe = request.form["mot_de_passe"]
-
+        if (
+            len(mot_de_passe) < 8
+            or not re.search(r"[A-Z]", mot_de_passe)
+            or not re.search(r"[a-z]", mot_de_passe)
+            or not re.search(r"\d", mot_de_passe)
+            or not re.search(r"[^A-Za-z0-9]", mot_de_passe)
+        ):
+            return "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.", 400
+    
         mot_de_passe_hash = generate_password_hash(mot_de_passe)
 
         conn = get_db()
@@ -463,18 +471,19 @@ def inscription():
 
         # Connexion automatique après inscription
         utilisateur = execute_query(conn, """
-            SELECT * FROM utilisateurs
-            WHERE email = ?
-        """, (email,)).fetchone()
-
+                SELECT * FROM utilisateurs
+                WHERE email = ?
+            """, (email,)).fetchone()
+        
         conn.close()
-
+        
         session["utilisateur_id"] = utilisateur["id"]
         session["nom_utilisateur"] = utilisateur["nom"]
-
+        
         return redirect("/")
 
     return render_template("inscriptions.html")
+
 @app.route("/connexion", methods=["GET", "POST"])
 def connexion():
     if request.method == "POST":
