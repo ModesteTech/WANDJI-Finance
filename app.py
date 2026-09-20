@@ -16,21 +16,23 @@ def init_db():
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS depenses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            montant REAL NOT NULL,
-            categorie TEXT NOT NULL,
-            description TEXT,
-            date TEXT NOT NULL
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        montant REAL NOT NULL,
+        categorie TEXT NOT NULL,
+        description TEXT,
+        date TEXT NOT NULL,
+        utilisateur_id INTEGER
         )
     """)
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS revenus (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            montant REAL NOT NULL,
-            source TEXT NOT NULL,
-            description TEXT,
-            date TEXT NOT NULL
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        montant REAL NOT NULL,
+        source TEXT NOT NULL,
+        description TEXT,
+        date TEXT NOT NULL,
+        utilisateur_id INTEGER
         )
     """)
 
@@ -45,6 +47,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+init_db()
 
 @app.route("/")
 def accueil():
